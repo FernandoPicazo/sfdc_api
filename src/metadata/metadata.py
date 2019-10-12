@@ -31,4 +31,5 @@ class Metadata:
         return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=body.encode('utf-8'))
 
     def retrieve(self, package):
-        print('TODO')
+        headers = ''
+        return
