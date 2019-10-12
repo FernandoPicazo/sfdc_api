@@ -15,3 +15,5 @@
 # Sobject API
 - [] Create ability to enumerate all custom objects
 
+# Metadata API
+- [] Create restful metadata API interface
