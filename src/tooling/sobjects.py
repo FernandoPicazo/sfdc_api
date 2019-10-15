@@ -20,7 +20,7 @@ class SObject:
     #   Purpose: Lists all available object under the SObject domain in the tooling API
     """
     def list_sobjects(self):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/tooling/sobjects/'
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/'
         return self._CONNECTION.send_http_request(endpoint, 'GET', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
     
     """
@@ -29,7 +29,7 @@ class SObject:
     #   Receives: name- name of the sobject type, body - a dictionary of all fields required to create the new object
     """
     def create(self, name, body):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/sobjects/' + name + '/'
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/sobjects/' + name + '/'
         return self._CONNECTION.send_http_request(endpoint, 'POST', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
 
     """
@@ -38,7 +38,7 @@ class SObject:
     #   Receives: name - name of tooling object to study, [detail]- optional flag, used to describe all fields associated with an object
     """
     def describe(self, name, detail = False):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name 
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name
         if detail:
             endpoint += '/describe/'
         else:
@@ -50,7 +50,7 @@ class SObject:
     #   Purpose: gets a specific instance of an object and describes the associated fields
     """
     def get_by_id(self, name, id):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
         return self._CONNECTION.send_http_request(endpoint, 'GET', '')
     
     """
@@ -58,13 +58,12 @@ class SObject:
     #   Purpose: deletes a specific instance of an object
     """
     def delete(self, name, id):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
         return self._CONNECTION.send_http_request(endpoint, 'DELETE', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
-        print("")
     """
     #Function: update
     #   Purpose: used to update the fields associated with a specific object
     """
     def update(self, name, id, body):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
         return self._CONNECTION.send_http_request(endpoint, 'PATCH', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
