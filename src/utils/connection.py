@@ -12,13 +12,15 @@ production_login_url = 'https://login.salesforce.com/services/oauth2/token'
 # noinspection PyTypeChecker,PyTypeChecker,PyTypeChecker
 # TODO: Session refresh not handled
 # TODO: Be able to generate different urls for rest and soap resources; e.g.
+# TODO: Create mapper function to create generic authentication details
 class Connection:
-    # Instantiation constants
+
     ORG_LOGIN_URL = None
     ORG_PASSWORD = None
     ORG_USERNAME = None
     APP_CLIENT_ID = None
     APP_CLIENT_SECRET = None
+    SESSION_DETAILS = dict()
     CONTEXT = ssl.SSLContext()
     HTTPS_HEADERS = HEADERS.copy()
     TIMEOUT = 20
@@ -88,7 +90,7 @@ class Connection:
             'password': self.ORG_PASSWORD,
         }
         body = parse.urlencode(info).encode('utf-8')
-        self.login_response = self.send_http_request(self.ORG_LOGIN_URL, 'POST',
+        self.SESSION_DETAILS = self.send_http_request(self.ORG_LOGIN_URL, 'POST',
                                                      self.HTTPS_HEADERS['oauth_login_headers'],
                                                      body=body)
         self.HTTPS_HEADERS["rest_authorized_headers"]["Authorization"] = "Bearer " + self.login_response["access_token"]
@@ -117,35 +119,44 @@ class Connection:
     # convert session to an oauth one; utilize session id as bearer token
     # TODO: improve conversion; maybe replace with a general function to use in all
     def soap_to_oauth(self):
-        root = ET.fromstring(self.login_response)
+        root = self.login_response
         # print(root.tag)
         tag = root[0][0][0]
         session_id = tag.find('{urn:partner.soap.sforce.com}sessionId').text
         self.HTTPS_HEADERS['rest_authorized_headers']['Authorization'] = 'Bearer ' + session_id
         instance_url = parse.urlparse(tag.find('{urn:partner.soap.sforce.com}serverUrl').text)
         parsed_url = '{uri.scheme}://{uri.netloc}/'.format(uri=instance_url)
-        print('instance_url: ' + str(parsed_url))
-        self.login_response = {'instance_url': parsed_url[:-1],
+        self.login_response = {'instance_url': parsed_url,
                                'session_id': session_id,
                                'metadata_server_url': tag.find('{urn:partner.soap.sforce.com}metadataServerUrl').text}
+        for child in root.iter():
+            self.SESSION_DETAILS[child.tag.replace('{urn:partner.soap.sforce.com}', '')] = child.text
 
-    def logout(self):
+        self.SESSION_DETAILS['instance_url'] = \
+            '{uri.scheme}://{uri.netloc}/'.format(uri=parse.urlparse(self.SESSION_DETAILS['serverUrl']))
+
+    def logout(self):  # TODO:refactor this for session type
         endpoint = "https://test.salesforce.com/services/oauth2/revoke"
         body = parse.urlencode({"token": self.login_response["access_token"]}).encode('utf-8')
         response = self.send_http_request(endpoint, "POST", body=body, header=self.HTTPS_HEADERS['oauth_login_headers'])
         return response
 
+    # TODO: add session renewal routine
     def send_http_request(self, endpoint: str, method: str, headers: dict, body=None):
         req = request.Request(endpoint, data=body, headers=headers, method=method)
         response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
-        response_str = response.read()
+        content_type = response.info().get('Content-Type')
+        print(content_type)
+        response_body = response.read()
         if response.getcode() >= 400:
             print("Error occurred while communicating with Salesforce server")
             raise Exception("Some sort of info dump on state and action being attempted")
-        if len(response_str) == 0:
+        if len(response_body) == 0:
             return ''
-        try:
-            response_json = json.loads(response_str)
-        except (ValueError, TypeError) as e:
-            return response_str
-        return response_json
+        # TODO: add error-handling
+        if 'xml' in content_type:
+            return ET.fromstring(response_body)
+        elif 'json' in content_type:
+            return json.loads(response_body)
+        else:
+            return response_body

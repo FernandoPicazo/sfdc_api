@@ -6,5 +6,5 @@ class Query:
         self._CONNECTION = conn
 
     def query(self, query):
-         endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/query/?q='+quote(query)
+         endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"] + '/services/data/v43.0/query/?q='+quote(query)
          return self._CONNECTION.send_http_request(endpoint,"GET", self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])

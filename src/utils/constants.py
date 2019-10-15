@@ -19,3 +19,24 @@ HEADERS = {
     },
     "soap_authorized_headers": {} #TODO: get the generic structure for this
 }
+
+SFDC_XML_NAMESPACE = "{urn:partner.soap.sforce.com}"
+
+SOAP_BODY_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>\
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"\
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema\
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance\
+     <soapenv:Header>\
+     <met:CallOptions>
+     </metCallOptions>\
+     <met:SessionHeader>\
+     <met:SessionId>\
+     {}\
+     </met:SessionId>\
+     </met:SessionHeader>\
+     </soapenv:Header>\
+     <soapenv:Body>\
+     {}\
+     </soapenv:Body>\
+     <soapenv:Envelope>\
+    """

@@ -8,6 +8,6 @@ class Sobjects:
         self._CONNECTION = connection
 
     def global_describe(self):
-        endpoint = self._CONNECTION.login_response["instance_url"]+'/services/data/v43.0/sobjects/'
+        endpoint = self._CONNECTION.SESSION_DETAILS["instance_url"]+'/services/data/v43.0/sobjects/'
         headers = self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers']
         return self._CONNECTION.send_http_request(endpoint, "GET", headers)
