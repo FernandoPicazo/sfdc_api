@@ -11,7 +11,7 @@ class RunTests:
 
     def __init__(self, conn):
         self.__CONNECTION = conn
-        self.__ENDPOINT = self.__CONNECTION.SESSION_DETAILS["instance_url"] + '/services/data/v43.0/tooling/runTestsAsynchronous'
+        self.__ENDPOINT = self.__CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v43.0/tooling/runTestsAsynchronous'
 
     """
     #Function run_specified_tests(self,skip_code_coverage = False, test_cases = None,  max_failed_tests=-1)
