@@ -1,3 +1,7 @@
+from ..utils import soap_body_builder
+from urllib import parse
+
+
 # Basic library for interfacing with the Salesforce Metadata API
 # Currently only implements the necessary calls to retrieve metadata
 # If further calls are made functionality should probably be split up under a few child repos
@@ -16,7 +20,7 @@ class Metadata:
             <met:CallOptions>
             </met:CallOptions>
             <met:SessionHeader>
-            <met:sessionId>""" + self._CONNECTION.login_response['session_id']  + """</met:sessionId>
+            <met:sessionId>""" + self._CONNECTION.CONNECTION_DETAILS['session_id'] + """</met:sessionId>
             </met:SessionHeader>
             </soapenv:Header>
             <soapenv:Body>
@@ -27,9 +31,35 @@ class Metadata:
             </met:readMetadata>
             </soapednv:Body>
             </soapenv:Envelope>"""
-        endpoint = self._CONNECTION.login_response['metadata_server_url']
+        endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
         return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=body.encode('utf-8'))
 
-    def retrieve(self, package):
-        headers = ''
-        return
+    ###
+    # Three possible ways to make a request for this endpoint LN:13710
+    # - List of package names
+    # - A list of specific files
+    # - Unpackaged a package xml representations
+    # Options:
+    # - Single package: boolean dictating whether a single package will be created
+    #
+    # ####
+    def retrieve(self, body):
+        endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
+        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
+        soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
+        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+
+    # TODO: add the
+    def check_retrieve_status(self, retrieve_id):
+        endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
+        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
+        body = ''.join([
+            '<met:checkRetrieveStatus>',
+            '<met:asyncProcessId>',
+            retrieve_id,
+            '</met:asyncProcessId>',
+            '<includeZip type="xsd:boolean">true</includeZip>',
+            '</met:checkRetrieveStatus>'
+        ])
+        soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
+        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))

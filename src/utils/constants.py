@@ -24,19 +24,20 @@ SFDC_XML_NAMESPACE = "{urn:partner.soap.sforce.com}"
 
 SOAP_BODY_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>\
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"\
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema\
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance\
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\
+     xmlns:met="http://soap.sforce.com/2006/04/metadata">\
      <soapenv:Header>\
-     <met:CallOptions>
-     </metCallOptions>\
+     <met:CallOptions>\
+     </met:CallOptions>\
      <met:SessionHeader>\
-     <met:SessionId>\
+     <met:sessionId>\
      {}\
-     </met:SessionId>\
+     </met:sessionId>\
      </met:SessionHeader>\
      </soapenv:Header>\
      <soapenv:Body>\
      {}\
      </soapenv:Body>\
-     <soapenv:Envelope>\
+     </soapenv:Envelope>\
     """

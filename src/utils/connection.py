@@ -4,6 +4,8 @@ import json
 import ssl
 import xml.etree.ElementTree as ET
 from .constants import HEADERS, AuthenticationMode
+from .string_utils import camel_to_snake_case
+
 sandbox_login_url = 'https://test.salesforce.com/services/oauth2/token'
 production_login_url = 'https://login.salesforce.com/services/oauth2/token'
 
@@ -14,13 +16,12 @@ production_login_url = 'https://login.salesforce.com/services/oauth2/token'
 # TODO: Be able to generate different urls for rest and soap resources; e.g.
 # TODO: Create mapper function to create generic authentication details
 class Connection:
-
     ORG_LOGIN_URL = None
     ORG_PASSWORD = None
     ORG_USERNAME = None
     APP_CLIENT_ID = None
     APP_CLIENT_SECRET = None
-    SESSION_DETAILS = dict()
+    CONNECTION_DETAILS = dict()
     CONTEXT = ssl.SSLContext()
     HTTPS_HEADERS = HEADERS.copy()
     TIMEOUT = 20
@@ -33,12 +34,11 @@ class Connection:
         self.ARGS = args
         self.parse_args()
 
-    # TODO: Delegate choosing login type to Session object
     def login(self):
         response = None
         if self.AUTH_CONFIG == AuthenticationMode.username_password_soap_flow:
-            response = self.login_by_soap()
-            self.soap_to_oauth()
+            self.login_by_soap()
+            response = self.soap_to_oauth()
         elif self.AUTH_CONFIG == AuthenticationMode.username_password_rest_flow:
             response = self.login_by_oauth2()
         else:
@@ -48,7 +48,7 @@ class Connection:
     # TODO: consider moving this into the session object to clean up Connection class
     def parse_args(self):
         arg_keys = self.ARGS.keys()
-        print(self.ARGS)
+        #print(self.ARGS)
         oauth_args = ['username', 'password', 'client_key', 'client_secret']
         soap_args = ['username', 'password']
         is_oauth = all([i in arg_keys for i in oauth_args])
@@ -80,6 +80,7 @@ class Connection:
     #       - Error logging
     #       - Error handling
     """
+
     def login_by_oauth2(self):  # TODO: rename this to reflect username-password login
         # print("Logging into " + self.ORG_LOGIN_URL)
         info = {
@@ -90,9 +91,9 @@ class Connection:
             'password': self.ORG_PASSWORD,
         }
         body = parse.urlencode(info).encode('utf-8')
-        self.SESSION_DETAILS = self.send_http_request(self.ORG_LOGIN_URL, 'POST',
-                                                     self.HTTPS_HEADERS['oauth_login_headers'],
-                                                     body=body)
+        self.CONNECTION_DETAILS = self.send_http_request(self.ORG_LOGIN_URL, 'POST',
+                                                      self.HTTPS_HEADERS['oauth_login_headers'],
+                                                      body=body)
         self.HTTPS_HEADERS["rest_authorized_headers"]["Authorization"] = "Bearer " + self.login_response["access_token"]
         return self.login_response
 
@@ -108,7 +109,7 @@ class Connection:
             '</se:Body>',
             '</se:Envelope>'
         ]).encode('utf-8')
-        #TODO: create login response parser
+        # TODO: create login response parser
         soap_url = self.ORG_LOGIN_URL + 'services/Soap/u/45.0'
         self.login_response = self.send_http_request(soap_url,
                                                      'POST',
@@ -130,10 +131,16 @@ class Connection:
                                'session_id': session_id,
                                'metadata_server_url': tag.find('{urn:partner.soap.sforce.com}metadataServerUrl').text}
         for child in root.iter():
-            self.SESSION_DETAILS[child.tag.replace('{urn:partner.soap.sforce.com}', '')] = child.text
+            snake_case_key = camel_to_snake_case(child.tag.replace('{urn:partner.soap.sforce.com}', ''))
+            if snake_case_key != 'None':
+                self.CONNECTION_DETAILS[snake_case_key] = child.text
 
-        self.SESSION_DETAILS['instance_url'] = \
-            '{uri.scheme}://{uri.netloc}/'.format(uri=parse.urlparse(self.SESSION_DETAILS['serverUrl']))
+        # [print(key) for key in self.CONNECTION_DETAILS.keys()]
+
+        self.CONNECTION_DETAILS['instance_url'] = \
+            '{uri.scheme}://{uri.netloc}/'.format(uri=parse.urlparse(self.CONNECTION_DETAILS['server_url']))
+        # self.CONNECTION_DETAILS['session_id'] = self.CONNECTION_DETAILS.pop('sessionId')
+        return self.CONNECTION_DETAILS
 
     def logout(self):  # TODO:refactor this for session type
         endpoint = "https://test.salesforce.com/services/oauth2/revoke"
@@ -144,9 +151,13 @@ class Connection:
     # TODO: add session renewal routine
     def send_http_request(self, endpoint: str, method: str, headers: dict, body=None):
         req = request.Request(endpoint, data=body, headers=headers, method=method)
-        response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
+        response = None
+        try:
+            response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
+        except Exception as e:
+            print(e.read())
+
         content_type = response.info().get('Content-Type')
-        print(content_type)
         response_body = response.read()
         if response.getcode() >= 400:
             print("Error occurred while communicating with Salesforce server")
