@@ -63,3 +63,23 @@ class Metadata:
         ])
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
         return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+
+    # TODO: add full support for multiple queries
+    def list_metadata(self, meta_type, folder_name=''):
+        endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
+        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
+        retrieve_query_template = ''.join([
+            '<folder>{}</folder>',
+            '<type>{}</type>',
+        ])
+        list_metadata_request_template = ''.join([
+            '<met:listMetadata>',
+            '<met:queries>{}</met:queries>'
+            '<met:asOfVersion>45.0</met:asOfVersion>',
+            '</met:listMetadata>',
+        ])
+        retrieve_query = retrieve_query_template.format(folder_name, meta_type)
+        list_metadata_request = list_metadata_request_template.format(retrieve_query)
+        soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], list_metadata_request)
+        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+
