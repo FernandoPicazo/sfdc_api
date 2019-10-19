@@ -1,2 +1,6 @@
 __pycache__/
 .idea/
+test*.py
+.DS_Store
+dist/
+*.egg-info
