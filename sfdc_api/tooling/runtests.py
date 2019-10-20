@@ -37,12 +37,12 @@ class RunTests:
             print("\t2.) A dictionary keyed with test types and valued with a list test classes")
             print("Please refer to the documentation for this API call")
             #raise an error here
-        return self.__CONNECTION.send_http_request(self.__ENDPOINT, 'POST', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
+        return self.__CONNECTION.send_http_request(self.__ENDPOINT, 'POST', self.__CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
 
     def run_local_tests(self, skip_code_coverage = False):
-        body  = {'testLevel': "RunLocalTests", 'skipCodeCoverage' : skip_code_coverage}
-        return self.__CONNECTION.send_http_request(self.__ENDPOINT, 'POST', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
+        body = {'testLevel': "RunLocalTests", 'skipCodeCoverage' : skip_code_coverage}
+        return self.__CONNECTION.send_http_request(self.__ENDPOINT, 'POST', self.__CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
 
     def run_all_tests_in_org(self, skip_code_coverage = False):
-        body  = {'testLevel': "RunAllTestsInOrg", 'skipCodeCoverage': skip_code_coverage}
-        return self.__CONNECTION.send_http_request(self.__ENDPOINT, 'POST', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
+        body = {'testLevel': "RunAllTestsInOrg", 'skipCodeCoverage': skip_code_coverage}
+        return self.__CONNECTION.send_http_request(self.__ENDPOINT, 'POST', self.__CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
