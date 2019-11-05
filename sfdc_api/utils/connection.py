@@ -156,6 +156,7 @@ class Connection:
             response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
         except Exception as e:
             print(e.read())
+            raise(e)
 
         content_type = response.info().get('Content-Type')
         response_body = response.read()

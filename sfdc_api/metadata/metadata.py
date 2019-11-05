@@ -12,6 +12,7 @@ class Metadata:
 
     def __init__(self, connection):
         self._CONNECTION = connection
+        self._ENDPOINT = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
 
     def read(self, metadata_type, names):
         headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
@@ -83,3 +84,12 @@ class Metadata:
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], list_metadata_request)
         return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
 
+    def describe_metadata(self):
+        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
+        describe_metadata_template = ''.join([
+            '<met:describeMetadata>',
+            '<met:asOfVersion>45.0</met:asOfVersion>'
+            '</met:describeMetadata>'
+        ])
+        soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], describe_metadata_template)
+        return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', headers, body= soap_body.encode('utf-8'))
