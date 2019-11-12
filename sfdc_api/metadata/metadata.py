@@ -16,24 +16,15 @@ class Metadata:
 
     def read(self, metadata_type, names):
         headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
-        body = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:met="http://soap.sforce.com/2006/04/metadata">\
-            <soapenv:Header>
-            <met:CallOptions>
-            </met:CallOptions>
-            <met:SessionHeader>
-            <met:sessionId>""" + self._CONNECTION.CONNECTION_DETAILS['session_id'] + """</met:sessionId>
-            </met:SessionHeader>
-            </soapenv:Header>
-            <soapenv:Body>
-            <met:readMetadata>
-            <met:type>""" + metadata_type + """</met:type>
-            <!--Zero or more repetitions:-->
-            <met:fullNames>""" + names + """</met:fullNames>
-            </met:readMetadata>
-            </soapednv:Body>
-            </soapenv:Envelope>"""
+        body = "".join([
+            "<met:readMetadata>"
+            "<met:type>" + metadata_type + "</met:type>"
+            "<met:fullNames>" + names + "</met:fullNames>"
+            "</met:readMetadata>"
+        ])
+        soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
         endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
-        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
 
     ###
     # Three possible ways to make a request for this endpoint LN:13710
