@@ -1,7 +1,7 @@
 # from distutils.core import setup
 from setuptools import setup, find_packages
 setup(name='sfdc_api',
-      version='0.1dev2',
+      version='0.1dev3',
       packages=find_packages(),
       license='MIT',
       download_url='https://github.com/FernandoPicazo/sfdc_api.git',
