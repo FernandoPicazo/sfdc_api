@@ -17,9 +17,9 @@ class Metadata:
     def read(self, metadata_type, names):
         headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
         body = "".join([
-            "<met:readMetadata>"
-            "<met:type>" + metadata_type + "</met:type>"
-            "<met:fullNames>" + names + "</met:fullNames>"
+            "<met:readMetadata>",
+            "<met:type>" + metadata_type + "</met:type>",
+            "<met:fullNames>" + names + "</met:fullNames>",
             "</met:readMetadata>"
         ])
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
