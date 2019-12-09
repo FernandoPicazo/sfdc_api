@@ -103,7 +103,7 @@ class Connection:
             '<se:Header/>',
             '<se:Body>',
             '<login xmlns="urn:partner.soap.sforce.com">',
-            '<username>' + self.ORG_USERNAME + '</username>',
+            '<username>'+ self.ORG_USERNAME + '</username>',
             '<password>' + self.ORG_PASSWORD + '</password>',
             '</login>',
             '</se:Body>',
@@ -157,7 +157,10 @@ class Connection:
         except Exception as e:
             print(e.read())
             raise(e)
+        return self.handle_http_response(response)
 
+    @staticmethod
+    def handle_http_response(response):
         content_type = response.info().get('Content-Type')
         response_body = response.read()
         if response.getcode() >= 400:
