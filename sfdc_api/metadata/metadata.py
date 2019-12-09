@@ -9,13 +9,12 @@ from urllib import parse
 
 class Metadata:
     _CONNECTION = None
-
+    _HEADERS =  {'content-type': 'text/xml', 'SOAPAction': '""'}
     def __init__(self, connection):
         self._CONNECTION = connection
         self._ENDPOINT = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
 
     def read(self, metadata_type, names):
-        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
         body = "".join([
             "<met:readMetadata>",
             "<met:type>" + metadata_type + "</met:type>",
@@ -24,7 +23,7 @@ class Metadata:
         ])
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
         endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
-        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
     ###
     # Three possible ways to make a request for this endpoint LN:13710
@@ -37,14 +36,12 @@ class Metadata:
     # ####
     def retrieve(self, body):
         endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
-        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
-        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
     # TODO: add the
     def check_retrieve_status(self, retrieve_id):
         endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
-        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
         body = ''.join([
             '<met:checkRetrieveStatus>',
             '<met:asyncProcessId>',
@@ -54,12 +51,11 @@ class Metadata:
             '</met:checkRetrieveStatus>'
         ])
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], body)
-        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
     # TODO: add full support for multiple queries
     def list_metadata(self, meta_type, folder_name=''):
         endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
-        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
         retrieve_query_template = ''.join([
             '<folder>{}</folder>',
             '<type>{}</type>',
@@ -73,14 +69,24 @@ class Metadata:
         retrieve_query = retrieve_query_template.format(folder_name, meta_type)
         list_metadata_request = list_metadata_request_template.format(retrieve_query)
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], list_metadata_request)
-        return self._CONNECTION.send_http_request(endpoint, 'POST', headers, body=soap_body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
     def describe_metadata(self):
-        headers = {'content-type': 'text/xml', 'SOAPAction': '""'}
         describe_metadata_template = ''.join([
             '<met:describeMetadata>',
             '<met:asOfVersion>45.0</met:asOfVersion>'
             '</met:describeMetadata>'
         ])
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], describe_metadata_template)
-        return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', headers, body= soap_body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', self._HEADERS, body= soap_body.encode('utf-8'))
+
+    def describe_value_type(self, value_type_name):
+        print('TODO')
+        describe_value_type_template = ''.join([
+            '<met:describeValueType>',
+            '<met:type>{}</met:type>',
+            '</met:describeValueType>'
+        ])
+        describe_value_type_request = describe_value_type_template.format(value_type_name)
+        soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], describe_value_type_request)
+        return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
