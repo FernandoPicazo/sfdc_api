@@ -7,6 +7,7 @@ from .tooling import Tooling
 from .query import Query
 from .metadata import Metadata
 from .sobjects import Sobjects
+from .wsdl import WSDL
 
 
 class Session:
@@ -16,6 +17,7 @@ class Session:
     query = None
     metadata = None
     sobjects = None
+    wsdl = None
 
     # def __init__(self, org_username, org_password, client_id, client_key, org_url):
     def __init__(self, args: dict):
@@ -28,6 +30,7 @@ class Session:
         self.query = Query(self.connection)
         self.metadata = Metadata(self.connection)
         self.sobjects = Sobjects(self.connection)
+        self.wsdl = WSDL(self.connection)
         return login_response
 
     def logout(self):
