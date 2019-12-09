@@ -1,15 +1,13 @@
 from ..utils import soap_body_builder
-from urllib import parse
 
 
 # Basic library for interfacing with the Salesforce Metadata API
 # Currently only implements the necessary calls to retrieve metadata
 # If further calls are made functionality should probably be split up under a few child repos
-
-
 class Metadata:
     _CONNECTION = None
-    _HEADERS =  {'content-type': 'text/xml', 'SOAPAction': '""'}
+    _HEADERS = {'content-type': 'text/xml', 'SOAPAction': '""'}
+
     def __init__(self, connection):
         self._CONNECTION = connection
         self._ENDPOINT = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
