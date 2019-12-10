@@ -17,14 +17,12 @@ class WSDL:
         url = self.ORG_URL + 'services/wsdl/metadata'
         req = self.create_wsdl_request(url)
         response = request.urlopen(req)
-        print(response.read())
         return self._CONNECTION.handle_http_response(response)
 
     def get_tooling_wsdl(self):
         url = self.ORG_URL + 'services/wsdl/tooling'
         req = self.create_wsdl_request(url)
         response = request.urlopen(req)
-        print(response.read())
         return self._CONNECTION.handle_http_response(response)
 
     def create_wsdl_request(self, wsdl_url):
