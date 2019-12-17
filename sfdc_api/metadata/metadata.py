@@ -79,7 +79,6 @@ class Metadata:
         return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', self._HEADERS, body= soap_body.encode('utf-8'))
 
     def describe_value_type(self, value_type_name):
-        print('TODO')
         describe_value_type_template = ''.join([
             '<met:describeValueType>',
             '<met:type>{}</met:type>',
