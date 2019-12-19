@@ -53,12 +53,14 @@ class Metadata:
     def list_metadata(self, metadata_queries):
         endpoint = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
         retrieve_query_template = ''.join([
+            '<met:queries>',
             '<folder>{}</folder>',
             '<type>{}</type>',
+            '</met:queries>'
         ])
         list_metadata_request_template = ''.join([
             '<met:listMetadata>',
-            '<met:queries>{}</met:queries>'
+            '{}'
             '<met:asOfVersion>45.0</met:asOfVersion>',
             '</met:listMetadata>',
         ])
@@ -67,6 +69,7 @@ class Metadata:
             folder_name = query['folder']
             meta_type = query['name']
             retrieve_query += retrieve_query_template.format(folder_name, meta_type)
+        print(retrieve_query)
         list_metadata_request = list_metadata_request_template.format(retrieve_query)
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], list_metadata_request)
         return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
