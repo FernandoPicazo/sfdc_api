@@ -1,5 +1,6 @@
 from urllib import request
 from urllib import parse
+from urllib.error import HTTPError
 import json
 import ssl
 import xml.etree.ElementTree as ET
@@ -15,6 +16,7 @@ production_login_url = 'https://login.salesforce.com/services/oauth2/token'
 # TODO: Session refresh not handled
 # TODO: Be able to generate different urls for rest and soap resources; e.g.
 # TODO: Create mapper function to create generic authentication details
+# TODO: Do global ElementTree namespace registration to avoid editing the allocated namespaces for etrees
 class Connection:
     ORG_LOGIN_URL = None
     ORG_PASSWORD = None
@@ -110,7 +112,7 @@ class Connection:
             '</se:Envelope>'
         ]).encode('utf-8')
         # TODO: create login response parser
-        soap_url = self.ORG_LOGIN_URL + 'services/Soap/u/45.0'
+        soap_url = self.ORG_LOGIN_URL + 'services/Soap/u/47.0'
         self.login_response = self.send_http_request(soap_url,
                                                      'POST',
                                                      self.HTTPS_HEADERS['soap_login_headers'],
@@ -154,9 +156,12 @@ class Connection:
         response = None
         try:
             response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
-        except Exception as e:
-            print(e.read())
-            raise(e)
+            return response
+        except HTTPError as e:
+            if e.getcode() == 307:
+                redirect_url = e.headers['Location']
+                return self.send_http_request(endpoint=redirect_url, method=method, headers=headers, body=body)
+            raise e
         return self.handle_http_response(response)
 
     @staticmethod
