@@ -153,16 +153,14 @@ class Connection:
     # TODO: add session renewal routine
     def send_http_request(self, endpoint: str, method: str, headers: dict, body=None):
         req = request.Request(endpoint, data=body, headers=headers, method=method)
-        response = None
         try:
             response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
-            return response
+            return self.handle_http_response(response)
         except HTTPError as e:
             if e.getcode() == 307:
                 redirect_url = e.headers['Location']
                 return self.send_http_request(endpoint=redirect_url, method=method, headers=headers, body=body)
             raise e
-        return self.handle_http_response(response)
 
     @staticmethod
     def handle_http_response(response):
