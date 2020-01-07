@@ -37,7 +37,7 @@ class SObject:
     #   Purpose: describes a specific object in the TOOLING API
     #   Receives: name - name of tooling object to study, [detail]- optional flag, used to describe all fields associated with an object
     """
-    def describe(self, name, detail = False):
+    def describe(self, name, detail=False):
         endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name
         if detail:
             endpoint += '/describe/'

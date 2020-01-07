@@ -105,7 +105,7 @@ class Connection:
             '<se:Header/>',
             '<se:Body>',
             '<login xmlns="urn:partner.soap.sforce.com">',
-            '<username>'+ self.ORG_USERNAME + '</username>',
+            '<username>' + self.ORG_USERNAME + '</username>',
             '<password>' + self.ORG_PASSWORD + '</password>',
             '</login>',
             '</se:Body>',
@@ -157,7 +157,7 @@ class Connection:
             response = request.urlopen(req, timeout=self.TIMEOUT, context=self.CONTEXT)
             return self.handle_http_response(response)
         except HTTPError as e:
-            if e.getcode() == 307:
+            if 300 <= e.getcode() < 400:
                 redirect_url = e.headers['Location']
                 return self.send_http_request(endpoint=redirect_url, method=method, headers=headers, body=body)
             raise e
@@ -166,12 +166,8 @@ class Connection:
     def handle_http_response(response):
         content_type = response.info().get('Content-Type')
         response_body = response.read()
-        if response.getcode() >= 400:
-            print("Error occurred while communicating with Salesforce server")
-            raise Exception("Some sort of info dump on state and action being attempted")
         if len(response_body) == 0:
             return ''
-        # TODO: add error-handling
         if 'xml' in content_type:
             return ET.fromstring(response_body)
         elif 'json' in content_type:
