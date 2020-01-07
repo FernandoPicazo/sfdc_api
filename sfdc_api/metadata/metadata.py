@@ -61,7 +61,7 @@ class Metadata:
         list_metadata_request_template = ''.join([
             '<met:listMetadata>',
             '{}'
-            '<met:asOfVersion>45.0</met:asOfVersion>',
+            '<met:asOfVersion>47.0</met:asOfVersion>',
             '</met:listMetadata>',
         ])
         retrieve_query = ''
