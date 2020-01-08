@@ -50,14 +50,14 @@ class Connection:
     # TODO: consider moving this into the session object to clean up Connection class
     def parse_args(self):
         arg_keys = self.ARGS.keys()
-        #print(self.ARGS)
         oauth_args = ['username', 'password', 'client_key', 'client_secret']
         soap_args = ['username', 'password']
         is_oauth = all([i in arg_keys for i in oauth_args])
         is_soap = all([i in arg_keys for i in soap_args]) and not is_oauth  # Only true if oauth doesn't pass
         if 'org_login_url' not in arg_keys:
-            raise Exception('Missing org_login_url ')
-        self.ORG_LOGIN_URL = self.ARGS['org_login_url']
+            raise ValueError('Missing org_login_url ')
+
+        self.ORG_LOGIN_URL = self.validate_url(self.ARGS['org_login_url'])
         if is_oauth:
             self.AUTH_CONFIG = AuthenticationMode.username_password_rest_flow
             self.ORG_USERNAME = self.ARGS['username']
@@ -94,8 +94,8 @@ class Connection:
         }
         body = parse.urlencode(info).encode('utf-8')
         self.CONNECTION_DETAILS = self.send_http_request(self.ORG_LOGIN_URL, 'POST',
-                                                      self.HTTPS_HEADERS['oauth_login_headers'],
-                                                      body=body)
+                                                         self.HTTPS_HEADERS['oauth_login_headers'],
+                                                         body=body)
         self.HTTPS_HEADERS["rest_authorized_headers"]["Authorization"] = "Bearer " + self.login_response["access_token"]
         return self.login_response
 
@@ -147,7 +147,8 @@ class Connection:
     def logout(self):  # TODO:refactor this for session type
         endpoint = "https://test.salesforce.com/services/oauth2/revoke"
         body = parse.urlencode({"token": self.login_response["access_token"]}).encode('utf-8')
-        response = self.send_http_request(endpoint, "POST", body=body, header=self.HTTPS_HEADERS['oauth_login_headers'])
+        response = self.send_http_request(endpoint, "POST", body=body,
+                                          headers=self.HTTPS_HEADERS['oauth_login_headers'])
         return response
 
     # TODO: add session renewal routine
@@ -174,3 +175,28 @@ class Connection:
             return json.loads(response_body)
         else:
             return response_body
+
+    @staticmethod
+    def validate_url(url):
+        parse.urlparse(url)  # Just to make sure the URL is valid to begin with
+        if not url.endswith('/'):
+            return url + '/'  # Ensure we can build
+        return url
+
+
+class CustomRedirectHandler(request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        m = req.get_method()
+        if (not (code in (301, 302, 303, 307) and m in ("GET", "HEAD")
+                 or code in (301, 302, 303) and m == "POST")):
+            raise HTTPError(req.full_url, code, msg, headers, fp)
+
+        newurl = newurl.replace(' ', '%20')
+
+        content_headers = ("content-length", "content-type")
+        newheaders = {k: v for k, v in req.headers.items()
+                      if k.lower() not in content_headers}
+        return request.Request(newurl,
+                               headers=newheaders,
+                               origin_req_host=req.origin_req_host,
+                               unverifiable=True)

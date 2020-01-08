@@ -2,12 +2,12 @@
 # Basically just serves a driver for neater API interactions
 # This class can further see improvement by providing handling for out of order execution
 # Links objects together 
-from .utils import Connection
-from .tooling import Tooling
-from .query import Query
-from .metadata import Metadata
-from .sobjects import Sobjects
-from .wsdl import WSDL
+from sfdc_api.utils import Connection
+from sfdc_api.tooling import Tooling
+from sfdc_api.query import Query
+from sfdc_api.metadata import Metadata
+from sfdc_api.sobjects import Sobjects
+from sfdc_api.wsdl import WSDL
 
 
 class Session:
