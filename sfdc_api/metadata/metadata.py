@@ -11,6 +11,7 @@ class Metadata:
     def __init__(self, connection):
         self._CONNECTION = connection
         self._ENDPOINT = self._CONNECTION.CONNECTION_DETAILS['metadata_server_url']
+        self.VERSION = self._CONNECTION.VERSION
 
     def read(self, metadata_type, names):
         body = "".join([
@@ -61,7 +62,7 @@ class Metadata:
         list_metadata_request_template = ''.join([
             '<met:listMetadata>',
             '{}'
-            '<met:asOfVersion>47.0</met:asOfVersion>',
+            '<met:asOfVersion>{}</met:asOfVersion>',
             '</met:listMetadata>',
         ])
         retrieve_query = ''
@@ -69,18 +70,20 @@ class Metadata:
             folder_name = query['folder']
             meta_type = query['name']
             retrieve_query += retrieve_query_template.format(folder_name, meta_type)
-        list_metadata_request = list_metadata_request_template.format(retrieve_query)
+        list_metadata_request = list_metadata_request_template.format(retrieve_query, self.VERSION)
+        print(list_metadata_request)
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], list_metadata_request)
         return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
     def describe_metadata(self):
         describe_metadata_template = ''.join([
             '<met:describeMetadata>',
-            '<met:asOfVersion>45.0</met:asOfVersion>'
+            '<met:asOfVersion>{}</met:asOfVersion>'
             '</met:describeMetadata>'
-        ])
+        ]).format(self.VERSION)
+        print(describe_metadata_template)
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], describe_metadata_template)
-        return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', self._HEADERS, body= soap_body.encode('utf-8'))
+        return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
     def describe_value_type(self, value_type_name):
         describe_value_type_template = ''.join([

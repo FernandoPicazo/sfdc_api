@@ -20,9 +20,9 @@ class Session:
     wsdl = None
 
     # def __init__(self, org_username, org_password, client_id, client_key, org_url):
-    def __init__(self, args: dict):
+    def __init__(self, username='', password='', client_key='', client_secret='', org_login_url='https://login.salesforce.com/', version=45.0):
         # initialize connection objects only
-        self.connection = Connection(args)
+        self.connection = Connection(username=username, password=password, client_key=client_key, client_secret=client_secret, org_login_url=org_login_url, version=version)
 
     def login(self):
         login_response = self.connection.login()

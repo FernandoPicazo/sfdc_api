@@ -23,6 +23,7 @@ class Connection:
     ORG_USERNAME = None
     APP_CLIENT_ID = None
     APP_CLIENT_SECRET = None
+    VERSION = None
     CONNECTION_DETAILS = dict()
     CONTEXT = ssl.SSLContext()
     HTTPS_HEADERS = HEADERS.copy()
@@ -32,9 +33,8 @@ class Connection:
     # TODO: create a class to outsource the handling of different response formats in another class
     login_response = None
 
-    def __init__(self, args: dict):
-        self.ARGS = args
-        self.parse_args()
+    def __init__(self, username='', password='', client_key='', client_secret='', org_login_url='https://login.salesforce.com/', version=47.0):
+        self.parse_args(locals())
 
     def login(self):
         response = None
@@ -48,8 +48,9 @@ class Connection:
         return response
 
     # TODO: consider moving this into the session object to clean up Connection class
-    def parse_args(self):
-        arg_keys = self.ARGS.keys()
+    def parse_args(self, args):
+        sanitized_args = {key: value for (key, value) in args.items() if value and key != 'self'}  # Clean empty values
+        arg_keys = sanitized_args.keys()
         oauth_args = ['username', 'password', 'client_key', 'client_secret']
         soap_args = ['username', 'password']
         is_oauth = all([i in arg_keys for i in oauth_args])
@@ -57,19 +58,20 @@ class Connection:
         if 'org_login_url' not in arg_keys:
             raise ValueError('Missing org_login_url ')
 
-        self.ORG_LOGIN_URL = self.validate_url(self.ARGS['org_login_url'])
+        self.ORG_LOGIN_URL = self.validate_url(args['org_login_url'])
+        self.VERSION = args['version']
         if is_oauth:
             self.AUTH_CONFIG = AuthenticationMode.username_password_rest_flow
-            self.ORG_USERNAME = self.ARGS['username']
-            self.ORG_PASSWORD = self.ARGS['password']
-            self.APP_CLIENT_ID = self.ARGS['client_key']
-            self.APP_CLIENT_SECRET = self.ARGS['client_secret']
+            self.ORG_USERNAME = args['username']
+            self.ORG_PASSWORD = args['password']
+            self.APP_CLIENT_ID = args['client_key']
+            self.APP_CLIENT_SECRET = args['client_secret']
         elif is_soap:
             self.AUTH_CONFIG = AuthenticationMode.username_password_soap_flow
-            self.ORG_USERNAME = self.ARGS['username']
-            self.ORG_PASSWORD = self.ARGS['password']
+            self.ORG_USERNAME = args['username']
+            self.ORG_PASSWORD = args['password']
         else:
-            raise Exception('Unknown authentication config: ' + ','.join(arg_keys))
+            raise ValueError('Unknown authentication config: ' + ','.join(arg_keys))
 
     # TODO: implement JWT login routine
     """
@@ -184,19 +186,3 @@ class Connection:
         return url
 
 
-class CustomRedirectHandler(request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        m = req.get_method()
-        if (not (code in (301, 302, 303, 307) and m in ("GET", "HEAD")
-                 or code in (301, 302, 303) and m == "POST")):
-            raise HTTPError(req.full_url, code, msg, headers, fp)
-
-        newurl = newurl.replace(' ', '%20')
-
-        content_headers = ("content-length", "content-type")
-        newheaders = {k: v for k, v in req.headers.items()
-                      if k.lower() not in content_headers}
-        return request.Request(newurl,
-                               headers=newheaders,
-                               origin_req_host=req.origin_req_host,
-                               unverifiable=True)
