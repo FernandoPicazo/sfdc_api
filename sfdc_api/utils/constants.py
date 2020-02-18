@@ -8,6 +8,7 @@ class AuthenticationMode(enum.IntEnum):
     user_agent_rest_flow = 2
     username_password_soap_flow = 3
 
+
 # Dictionary of default headers used in order to better streamline creation of new requests to the salesforce api
 HEADERS = {
     "oauth_login_headers": {"Content-Type": "application/x-www-form-urlencoded"},
@@ -17,7 +18,7 @@ HEADERS = {
         "Content-Type": "application/json",
         "charset": "UTF-8"
     },
-    "soap_authorized_headers": {} #TODO: get the generic structure for this
+    "soap_authorized_headers": {}  # TODO: get the generic structure for this
 }
 
 SFDC_XML_NAMESPACE = "{urn:partner.soap.sforce.com}"
