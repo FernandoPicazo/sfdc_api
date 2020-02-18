@@ -25,6 +25,7 @@ class WSDL:
         response = request.urlopen(req)
         return self._CONNECTION.handle_http_response(response)
 
+    # TODO: Confirm that this works within a rest session
     def create_wsdl_request(self, wsdl_url):
         sid_cookie = SimpleCookie()
         sid_cookie['sid'] = self.SESSION_ID
