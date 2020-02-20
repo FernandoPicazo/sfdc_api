@@ -89,6 +89,7 @@ class Connection:
     #       - Error logging
     #       - Error handling
     """
+
     def login_by_oauth2(self):  # TODO: rename this to reflect username-password login
         info = {
             'client_id': self.APP_CLIENT_ID,
