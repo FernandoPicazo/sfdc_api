@@ -4,7 +4,7 @@ from urllib.error import HTTPError
 import json
 import ssl
 import xml.etree.ElementTree as ET
-from .constants import HEADERS, AuthenticationMode
+from .constants import HEADERS, AuthenticationMode, SFDC_XML_NAMESPACE
 from .string_utils import camel_to_snake_case
 
 sandbox_login_url = 'https://test.salesforce.com/services/oauth2/token'
@@ -33,7 +33,12 @@ class Connection:
     # TODO: create a class to outsource the handling of different response formats in another class
     login_response = None
 
-    def __init__(self, username='', password='', client_key='', client_secret='', org_login_url='https://login.salesforce.com/', version=47.0):
+    def __init__(self, username='',
+                 password='',
+                 client_key='',
+                 client_secret='',
+                 org_login_url=production_login_url,
+                 version=47.0):
         self.parse_args(locals())
 
     def login(self):
@@ -84,9 +89,7 @@ class Connection:
     #       - Error logging
     #       - Error handling
     """
-
     def login_by_oauth2(self):  # TODO: rename this to reflect username-password login
-        # print("Logging into " + self.ORG_LOGIN_URL)
         info = {
             'client_id': self.APP_CLIENT_ID,
             'client_secret': self.APP_CLIENT_SECRET,
@@ -102,6 +105,7 @@ class Connection:
         return self.login_response
 
     def login_by_soap(self):  # TODO: rename this to reflect username-password login
+        # TODO: utilize soap body builder
         body = ''.join([
             '<se:Envelope xmlns:se="http://schemas.xmlsoap.org/soap/envelope/">',
             '<se:Header/>',
@@ -114,7 +118,7 @@ class Connection:
             '</se:Envelope>'
         ]).encode('utf-8')
         # TODO: create login response parser
-        soap_url = self.ORG_LOGIN_URL + 'services/Soap/u/47.0'
+        soap_url = self.ORG_LOGIN_URL + 'services/Soap/u/' + str(self.VERSION)
         self.login_response = self.send_http_request(soap_url,
                                                      'POST',
                                                      self.HTTPS_HEADERS['soap_login_headers'],
@@ -125,28 +129,24 @@ class Connection:
     # TODO: improve conversion; maybe replace with a general function to use in all
     def soap_to_oauth(self):
         root = self.login_response
-        # print(root.tag)
         tag = root[0][0][0]
-        session_id = tag.find('{urn:partner.soap.sforce.com}sessionId').text
+        session_id = tag.find(SFDC_XML_NAMESPACE + 'sessionId').text
         self.HTTPS_HEADERS['rest_authorized_headers']['Authorization'] = 'Bearer ' + session_id
-        instance_url = parse.urlparse(tag.find('{urn:partner.soap.sforce.com}serverUrl').text)
-        parsed_url = '{uri.scheme}://{uri.netloc}/'.format(uri=instance_url)
-        self.login_response = {'instance_url': parsed_url,
-                               'session_id': session_id,
-                               'metadata_server_url': tag.find('{urn:partner.soap.sforce.com}metadataServerUrl').text}
         for child in root.iter():
             snake_case_key = camel_to_snake_case(child.tag.replace('{urn:partner.soap.sforce.com}', ''))
             if snake_case_key != 'None':
                 self.CONNECTION_DETAILS[snake_case_key] = child.text
 
-        # [print(key) for key in self.CONNECTION_DETAILS.keys()]
-
+        # generate a base url for rest api interactions
         self.CONNECTION_DETAILS['instance_url'] = \
             '{uri.scheme}://{uri.netloc}/'.format(uri=parse.urlparse(self.CONNECTION_DETAILS['server_url']))
-        # self.CONNECTION_DETAILS['session_id'] = self.CONNECTION_DETAILS.pop('sessionId')
+
+        self.login_response = {'instance_url': self.CONNECTION_DETAILS['instance_url'],
+                               'session_id': self.CONNECTION_DETAILS['session_id'],
+                               'metadata_server_url': self.CONNECTION_DETAILS['metadata_server_url']}
         return self.CONNECTION_DETAILS
 
-    def logout(self):  # TODO:refactor this for session type
+    def logout(self):  # TODO: refactor this for session type
         endpoint = "https://test.salesforce.com/services/oauth2/revoke"
         body = parse.urlencode({"token": self.login_response["access_token"]}).encode('utf-8')
         response = self.send_http_request(endpoint, "POST", body=body,
