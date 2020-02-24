@@ -71,7 +71,6 @@ class Metadata:
             meta_type = query['name']
             retrieve_query += retrieve_query_template.format(folder_name, meta_type)
         list_metadata_request = list_metadata_request_template.format(retrieve_query, self.VERSION)
-        print(list_metadata_request)
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], list_metadata_request)
         return self._CONNECTION.send_http_request(endpoint, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 
@@ -81,7 +80,6 @@ class Metadata:
             '<met:asOfVersion>{}</met:asOfVersion>'
             '</met:describeMetadata>'
         ]).format(self.VERSION)
-        print(describe_metadata_template)
         soap_body = soap_body_builder(self._CONNECTION.CONNECTION_DETAILS['session_id'], describe_metadata_template)
         return self._CONNECTION.send_http_request(self._ENDPOINT, 'POST', self._HEADERS, body=soap_body.encode('utf-8'))
 

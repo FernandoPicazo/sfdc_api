@@ -23,7 +23,8 @@ class Tooling:
         print("Hello from the search function")
 
     def query(self, query):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/query/?q='+quote(query)
+        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v' + \
+                   str(self._CONNECTION.VERSION) + '/tooling/query/?q=' + quote(query)
         return self._CONNECTION.send_http_request(endpoint,
                                                   "GET",
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
