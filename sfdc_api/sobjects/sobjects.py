@@ -1,4 +1,4 @@
-# from utils import Connection
+from sfdc_api.utils import Connection
 from json import dumps
 
 
@@ -6,13 +6,14 @@ from json import dumps
 class Sobjects:
     _CONNECTION = None
 
-    def __init__(self, connection):
+    def __init__(self, connection: Connection):
         self._CONNECTION = connection
+        self.base_endpoint = self._CONNECTION.CONNECTION_DETAILS['instance_url'] + 'services/data/v' + \
+                             str(self._CONNECTION.VERSION) + '/sobjects/'
 
     def global_describe(self):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v43.0/sobjects/'
         headers = self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers']
-        return self._CONNECTION.send_http_request(endpoint, "GET", headers)
+        return self._CONNECTION.send_http_request(self.base_endpoint, "GET", headers)
 
     """
     #Function: list_sobjects
@@ -20,8 +21,7 @@ class Sobjects:
     """
 
     def list_sobjects(self):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v43.0/sobjects/'
-        return self._CONNECTION.send_http_request(endpoint, 'GET',
+        return self._CONNECTION.send_http_request(self.base_endpoint, 'GET',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
 
     """
@@ -31,7 +31,7 @@ class Sobjects:
     """
 
     def create(self, name, body):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v43.0/sobjects/' + name + '/'
+        endpoint = self.base_endpoint + name + '/'
         return self._CONNECTION.send_http_request(endpoint, 'POST',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'],
                                                   dumps(body).encode('utf8'))
@@ -44,7 +44,7 @@ class Sobjects:
     """
 
     def describe(self, name, detail=False):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v43.0/sobjects/' + name
+        endpoint = self.base_endpoint + name
         if detail:
             endpoint += '/describe/'
         else:
@@ -58,8 +58,7 @@ class Sobjects:
     """
 
     def get_by_id(self, name, id):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS[
-                       "instance_url"] + '/services/data/v43.0/sobjects/' + name + '/' + id + '/'
+        endpoint = self.base_endpoint + name + '/' + id + '/'
         return self._CONNECTION.send_http_request(endpoint, 'GET',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
 
@@ -69,8 +68,7 @@ class Sobjects:
     """
 
     def delete(self, name, id):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS[
-                       "instance_url"] + '/services/data/v43.0/sobjects/' + name + '/' + id + '/'
+        endpoint = self.base_endpoint + name + '/' + id + '/'
         return self._CONNECTION.send_http_request(endpoint, 'DELETE',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
 
@@ -80,8 +78,7 @@ class Sobjects:
     """
 
     def update(self, name, id, body):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS[
-                       "instance_url"] + '/services/data/v43.0/sobjects/' + name + '/' + id + '/'
+        endpoint = self.base_endpoint + name + '/' + id + '/'
         return self._CONNECTION.send_http_request(endpoint, 'PATCH',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'],
                                                   dumps(body).encode('utf8'))
