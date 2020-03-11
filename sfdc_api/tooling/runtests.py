@@ -1,17 +1,19 @@
-from urllib import parse
-from urllib import request
 from json import dumps
 """
 # Class: runTestsAsynchronous
 #   Purpose: Implements the runTests Interface
 """
+
+
+#TODO: convert the print statements to ValueErrors and add contents as messages
 class RunTests:
     __CONNECTION = None
     __ENDPOINT = None
 
     def __init__(self, conn):
         self.__CONNECTION = conn
-        self.__ENDPOINT = self.__CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v43.0/tooling/runTestsAsynchronous'
+        self.__ENDPOINT = self.__CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v' + \
+                          str(self.__CONNECTION.VERSION) + '/tooling/runTestsAsynchronous'
 
     """
     #Function run_specified_tests(self,skip_code_coverage = False, test_cases = None,  max_failed_tests=-1)
@@ -19,7 +21,7 @@ class RunTests:
     """
     def run_specified_tests(self,  test_cases = None, skip_code_coverage = False, max_failed_tests=-1):
         body = test_cases
-        if(len(test_cases) == 0):
+        if len(test_cases) == 0:
             print("No tests specified, in order to use the run specified tests")
         if isinstance(test_cases, list):
             body = list(test_cases)

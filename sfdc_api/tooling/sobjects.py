@@ -2,7 +2,6 @@ from json import dumps
 """
 #Class: SObject
 #   Purpose: This class serves as an abstraction of the SObject model within the Salesforce Tooling API
-#       Wraps up all the calls to sobject portion of the tooling api
 #TODO: Error handling and presentation
 """
 class SObject:
