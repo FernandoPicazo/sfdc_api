@@ -51,7 +51,7 @@ class SObject:
     """
     def get_by_id(self, name, id):
         endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
-        return self._CONNECTION.send_http_request(endpoint, 'GET', '')
+        return self._CONNECTION.send_http_request(endpoint, 'GET', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
     
     """
     #Function: delete
@@ -66,4 +66,4 @@ class SObject:
     """
     def update(self, name, id, body):
         endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v43.0/tooling/sobjects/' + name + '/' + id + '/'
-        return self._CONNECTION.send_http_request(endpoint, 'PATCH', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
+        return self._CONNECTION.send_http_request(endpoint, 'PATCH', self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'], dumps(body).encode('utf8'))
