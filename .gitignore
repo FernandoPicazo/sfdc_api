@@ -1,6 +1,6 @@
 __pycache__/
 .idea/
-test*.py
+tests/
 .DS_Store
 dist/
 *.egg-info
