@@ -30,7 +30,10 @@ class Sobjects:
     #   Receives: name- name of the sobject type, body - a dictionary of all fields required to create the new object
     """
 
-    def create(self, name, body):
+    def create(self, name, body, *opts):
+        url_opts = ''
+        if opts:
+            url_opts = '/'.join(opts)
         endpoint = self.base_endpoint + name + '/'
         return self._CONNECTION.send_http_request(endpoint, 'POST',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'],
@@ -57,8 +60,11 @@ class Sobjects:
     #   Purpose: gets a specific instance of an object and describes the associated fields
     """
 
-    def get_by_id(self, name, id):
-        endpoint = self.base_endpoint + name + '/' + id + '/'
+    def get_by_id(self, name, id, *opts):
+        url_opts = ''
+        if opts:
+            url_opts = '/'.join(opts)
+        endpoint = self.base_endpoint + name + '/' + id + '/' + url_opts
         return self._CONNECTION.send_http_request(endpoint, 'GET',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
 
@@ -67,8 +73,11 @@ class Sobjects:
     #   Purpose: deletes a specific instance of an object
     """
 
-    def delete(self, name, id):
-        endpoint = self.base_endpoint + name + '/' + id + '/'
+    def delete(self, name, id, *opts):
+        url_opts = ''
+        if opts:
+            url_opts = '/'.join(opts)
+        endpoint = self.base_endpoint + name + '/' + id + '/' + url_opts
         return self._CONNECTION.send_http_request(endpoint, 'DELETE',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
 
@@ -77,8 +86,11 @@ class Sobjects:
     #   Purpose: used to update the fields associated with a specific object
     """
 
-    def update(self, name, id, body):
-        endpoint = self.base_endpoint + name + '/' + id + '/'
+    def update(self, name, id, body, *opts):
+        url_opts = ''
+        if opts:
+            url_opts = '/'.join(opts)
+        endpoint = self.base_endpoint + name + '/' + id + '/' + url_opts
         return self._CONNECTION.send_http_request(endpoint, 'PATCH',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'],
                                                   dumps(body).encode('utf8'))
