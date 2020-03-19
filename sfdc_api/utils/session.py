@@ -14,7 +14,7 @@ class Session:
     # doesn't store much more than the actual classes, should probably store some more information
     connection = None
     tooling = None
-    query = None
+    _query = None
     metadata = None
     sobjects = None
     wsdl = None
@@ -27,11 +27,14 @@ class Session:
     def login(self):
         login_response = self.connection.login()
         self.tooling = Tooling(self.connection)
-        self.query = Query(self.connection)
+        self._query = Query(self.connection)
         self.metadata = Metadata(self.connection)
         self.sobjects = Sobjects(self.connection)
         self.wsdl = WSDL(self.connection)
         return login_response
+
+    def query(self, query='', explain=False, query_identifier=''):
+        return self._query.query(query, explain, query_identifier)
 
     def logout(self):
         self.connection.logout()
