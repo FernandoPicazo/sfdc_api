@@ -6,6 +6,7 @@ import ssl
 import xml.etree.ElementTree as ET
 from .constants import HEADERS, AuthenticationMode, SFDC_XML_NAMESPACE
 from .string_utils import camel_to_snake_case
+from .elementtree_utils import register_all_namespaces
 
 sandbox_login_url = 'https://test.salesforce.com/services/oauth2/token'
 production_login_url = 'https://login.salesforce.com/services/oauth2/token'
@@ -173,6 +174,7 @@ class Connection:
         if len(response_body) == 0:
             return ''
         if 'xml' in content_type:
+            register_all_namespaces(response_body.decode())
             return ET.fromstring(response_body)
         elif 'json' in content_type:
             return json.loads(response_body)

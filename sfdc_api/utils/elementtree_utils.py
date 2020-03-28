@@ -3,6 +3,12 @@ from collections import defaultdict
 from io import StringIO
 
 
+def register_all_namespaces(xml_string):
+    namespaces = dict([node for _, node in ElementTree.iterparse(StringIO(xml_string), events=['start-ns'])])
+    for ns in namespaces:
+        ElementTree.register_namespace(ns, namespaces[ns])
+    return namespaces
+
 def strip_namespaces(metadata_etree):
     xml = ElementTree.tostring(metadata_etree).decode()
     it = ElementTree.iterparse(StringIO(xml))
