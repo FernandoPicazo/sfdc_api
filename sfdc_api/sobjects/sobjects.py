@@ -1,15 +1,27 @@
-from sfdc_api.utils import Connection
 from json import dumps
 
+"""
+#Class: SObject
+#   Purpose: This class serves as an abstraction of the SObject model within the Salesforce Tooling API
+#TODO: Error handling and presentation
+"""
 
-# TODO: make sure to remove shadowed name id from function parameters
-class Sobjects:
-    _CONNECTION = None
 
-    def __init__(self, connection: Connection):
+class SObject:
+    """
+    #Function: __init__
+    #   Purpose: Constructor for SObject, passed in a Connection object reference, for the purpose of sending http requests
+    """
+
+    def __init__(self, connection):
         self._CONNECTION = connection
         self.base_endpoint = self._CONNECTION.CONNECTION_DETAILS['instance_url'] + 'services/data/v' + \
                              str(self._CONNECTION.VERSION) + '/sobjects/'
+
+    """
+    #Function: list_sobjects
+    #   Purpose: Lists all available object under the SObject domain in the tooling API
+    """
 
     def global_describe(self):
         headers = self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers']
@@ -34,7 +46,7 @@ class Sobjects:
         url_opts = ''
         if opts:
             url_opts = '/'.join(opts)
-        endpoint = self.base_endpoint + name + '/'
+        endpoint = self.base_endpoint + name + '/' + url_opts
         return self._CONNECTION.send_http_request(endpoint, 'POST',
                                                   self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'],
                                                   dumps(body).encode('utf8'))

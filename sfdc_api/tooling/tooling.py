@@ -1,5 +1,7 @@
-from .sobjects import SObject
+import sfdc_api
+from sfdc_api.sobjects import SObject
 from .runtests import RunTests
+from ..query.query import Query
 from urllib.parse import quote
 
 
@@ -12,6 +14,7 @@ class Tooling:
         self._CONNECTION = conn
         self.sobjects = SObject(self._CONNECTION)
         self.runtests = RunTests(self._CONNECTION)
+        self._query = Query(self._CONNECTION, 'tooling')
 
     def completions(self):
         print("Hello from the completions function")
@@ -22,9 +25,5 @@ class Tooling:
     def search(self):
         print("Hello from the search function")
 
-    def query(self, query):
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"]+'/services/data/v' + \
-                   str(self._CONNECTION.VERSION) + '/tooling/query/?q=' + quote(query)
-        return self._CONNECTION.send_http_request(endpoint,
-                                                  "GET",
-                                                  self._CONNECTION.HTTPS_HEADERS['rest_authorized_headers'])
+    def query(self, query='', explain=False, query_identifier=''):
+        return self._query.query(query, explain, query_identifier)

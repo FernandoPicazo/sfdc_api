@@ -6,7 +6,7 @@ from sfdc_api.utils import Connection
 from sfdc_api.tooling import Tooling
 from sfdc_api.query import Query
 from sfdc_api.metadata import Metadata
-from sfdc_api.sobjects import Sobjects
+from sfdc_api.sobjects import SObject
 from sfdc_api.wsdl import WSDL
 
 
@@ -29,7 +29,7 @@ class Session:
         self.tooling = Tooling(self.connection)
         self._query = Query(self.connection)
         self.metadata = Metadata(self.connection)
-        self.sobjects = Sobjects(self.connection)
+        self.sobjects = SObject(self.connection)
         self.wsdl = WSDL(self.connection)
         return login_response
 

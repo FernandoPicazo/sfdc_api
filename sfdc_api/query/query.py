@@ -36,12 +36,13 @@ class QueryResult(dict):
 class Query:
     _CONNECTION = None
 
-    def __init__(self, conn: Connection):
+    def __init__(self, conn: Connection, parent_service_extension: str = ''):
         self._CONNECTION = conn
+        self.service_endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v' + \
+                   str(self._CONNECTION.VERSION) + '/' + parent_service_extension + '/query/'
 
     def query(self, query='', explain=False, query_identifier='') -> QueryResult:
-        endpoint = self._CONNECTION.CONNECTION_DETAILS["instance_url"] + '/services/data/v' + \
-                   str(self._CONNECTION.VERSION) + '/query/'
+        endpoint = self.service_endpoint
         if query and not explain and not query_identifier:
             endpoint += '?q=' + quote(query)
         elif query and explain and not query_identifier:
